@@ -1,25 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import LogIn from "./components/LogIn";
+import { ChatContext, ChatProvider } from "./context/ChatProvider";
+import io from "socket.io-client";
+import ChatRoom from "./components/ChatRoom";
+
+let socket;
+const CONNECTION_PORT = "localhost:3001/";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const { isLogged, updateSocket, room, userName } =
+    React.useContext(ChatContext);
+
+  React.useEffect(() => {
+    socket = io(CONNECTION_PORT);
+    updateSocket(socket);
+  }, []);
+
+  return <div className='App'>{!isLogged ? <LogIn /> : <ChatRoom />}</div>;
 }
 
-export default App;
+export default () => {
+  return (
+    <ChatProvider>
+      <App />
+    </ChatProvider>
+  );
+};
