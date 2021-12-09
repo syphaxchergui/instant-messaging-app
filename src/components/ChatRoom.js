@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import { ChatContext } from "../context/ChatProvider";
 import Chip from "@mui/material/Chip";
 import Message from "./Message";
+import MessageSys from "./MessageSys";
 
 const ChatRoom = () => {
   const { signOut, room, userName, socket, isLogged } =
@@ -24,6 +25,17 @@ const ChatRoom = () => {
           author: data.userName,
           date: new Date().toLocaleDateString(),
           message: data.message,
+        },
+      ]);
+    });
+    socket.on("user_joined_room", (data) => {
+      console.log(data);
+      setMessageList([
+        ...messageList,
+        {
+          author: "sys",
+          date: new Date().toLocaleDateString(),
+          message: "User "+ data.name + " joined room @" + data.roomId,
         },
       ]);
     });
@@ -57,7 +69,7 @@ const ChatRoom = () => {
         sx={{
           width: "95%",
           display: "flex",
-          flexDirection: 'column-reverse',
+          flexDirection: "column-reverse",
           alignItem: "center",
           justifyContent: "flex-start",
           overflowY: "auto",
@@ -65,7 +77,16 @@ const ChatRoom = () => {
           marginBottom: "70px",
         }}>
         {messageList.map((m) => {
-          return <Message author={m.author} date={m.date} m={m.message} isMe={m.author === userName ? true : false}/>;
+          if (m.author === "sys") return <MessageSys m={m.message} />;
+          else
+            return (
+              <Message
+                author={m.author}
+                date={m.date}
+                m={m.message}
+                isMe={m.author === userName ? true : false}
+              />
+            );
         })}
       </Box>
 
