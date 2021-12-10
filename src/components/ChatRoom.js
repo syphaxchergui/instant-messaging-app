@@ -15,6 +15,15 @@ const ChatRoom = () => {
     React.useContext(ChatContext);
   const [message, setMessage] = React.useState("");
   const [messageList, setMessageList] = React.useState([]);
+  const messagesEndRef = React.useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [messageList]);
 
   React.useEffect(() => {
     socket.on("recieve_msg", (data) => {
@@ -35,7 +44,19 @@ const ChatRoom = () => {
         {
           author: "sys",
           date: new Date().toLocaleDateString(),
-          message: "User "+ data.name + " joined room @" + data.roomId,
+          message: "User " + data.name + " joined room @" + data.roomId,
+        },
+      ]);
+    });
+
+    socket.on("user_unjoined_room", (data) => {
+      console.log(data);
+      setMessageList([
+        ...messageList,
+        {
+          author: "sys",
+          date: new Date().toLocaleDateString(),
+          message: "User " + data.roomId + " quit room @" + data.name,
         },
       ]);
     });
@@ -65,6 +86,7 @@ const ChatRoom = () => {
           onDelete={signOut}
         />
       </div>
+
       <Box
         sx={{
           width: "95%",
@@ -81,6 +103,7 @@ const ChatRoom = () => {
           else
             return (
               <Message
+                ref={messagesEndRef}
                 author={m.author}
                 date={m.date}
                 m={m.message}
